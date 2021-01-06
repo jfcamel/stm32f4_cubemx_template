@@ -19,39 +19,19 @@ set(OPTIMIZE "-Os")
 
 set(CMAKE_C_FLAGS "${MCU} ${OPTIMIZE} ${DEBUG} -ffunction-sections -fdata-sections -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -fpermissive -fexceptions -fnon-call-exceptions -fno-rtti -fno-use-cxa-atexit -fno-common")
-# set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=nano.specs -Wl,--gc-sections")
-set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=rdimon.specs -u _scan_float -u _printf_float -Wl,--gc-sections")
+set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=nano.specs -Wl,--gc-sections")
 
-set(C_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_gpio.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_rcc.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_utils.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_exti.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
+set(C_SOURCES_COMMON
+  ${CMAKE_SOURCE_DIR}/Core/Src/app.c
+  ${CMAKE_SOURCE_DIR}/Core/Src/stm32f4xx_it.c
+  ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_gpio.c
+  ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_rcc.c
+  ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_utils.c
+  ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_exti.c
+  ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32f4xx.c
   )
 
-set(ASM_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/startup_stm32f411xe.s
-  )
-
-set_property(SOURCE
-  ${CMAKE_CURRENT_SOURCE_DIR}/startup_stm32f411xe.s PROPERTY LANGUAGE C)
-
-add_executable(${PROJ}
-  ${C_SOURCES}
-  ${ASM_SOURCES}
-  )
-
-target_include_directories(${PROJ} PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc/
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include/
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
-  ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Inc/
-  )
-
-target_compile_definitions(${PROJ} PRIVATE
+set(DEFINITIONS_COMMON
   -DUSE_FULL_LL_DRIVER
   -DHSE_VALUE=25000000
   -DHSE_STARTUP_TIMEOUT=100
@@ -67,8 +47,40 @@ target_compile_definitions(${PROJ} PRIVATE
   -DSTM32F411xE
   )
 
+set(C_SOURCES
+  ${C_SOURCES_COMMON}
+  ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/main.c
+  )
+
+set(ASM_SOURCES
+  ${CMAKE_SOURCE_DIR}/startup_stm32f411xe.s
+  )
+
+set_property(SOURCE
+  ${CMAKE_SOURCE_DIR}/startup_stm32f411xe.s PROPERTY LANGUAGE C)
+
+add_executable(${PROJ}
+  ${C_SOURCES}
+  ${ASM_SOURCES}
+  )
+
+set(INCLUDES_COMMON
+  ${CMAKE_SOURCE_DIR}/Core/Inc/
+  ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Include/
+  ${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
+  ${CMAKE_SOURCE_DIR}/Drivers/STM32F4xx_HAL_Driver/Inc/
+  )
+
+target_include_directories(${PROJ} PRIVATE
+  ${INCLUDES_COMMON}
+  )
+
+target_compile_definitions(${PROJ} PRIVATE
+  ${DEFINITIONS_COMMON}
+  )
+
 target_link_libraries(${PROJ}
-  -lm -lnosys
+  -lc -lm -lnosys
   )
 
 add_custom_target(${PROJ}.bin ALL
@@ -78,4 +90,4 @@ add_custom_target(${PROJ}.bin ALL
 
 add_dependencies(${PROJ}.bin ${PROJ})
 
-include_directories(test)
+add_subdirectory(test)

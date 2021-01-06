@@ -14,11 +14,12 @@ set(FPU "-mfpu=fpv4-sp-d16")
 set(FLOAT-ABI "-mfloat-abi=hard")
 set(MCU "${CPU} -mthumb ${FPU} ${FLOAT-ABI}")
 
-set(DEBUG "-g0")
+set(DEBUG "-g1")
 set(OPTIMIZE "-Os")
 
 set(CMAKE_C_FLAGS "${MCU} ${OPTIMIZE} ${DEBUG} -ffunction-sections -fdata-sections -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -fpermissive -fexceptions -fnon-call-exceptions -fno-rtti -fno-use-cxa-atexit -fno-common")
+# set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=nano.specs -Wl,--gc-sections")
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=rdimon.specs -u _scan_float -u _printf_float -Wl,--gc-sections")
 
 set(C_SOURCES
@@ -76,3 +77,5 @@ add_custom_target(${PROJ}.bin ALL
   )
 
 add_dependencies(${PROJ}.bin ${PROJ})
+
+include_directories(test)

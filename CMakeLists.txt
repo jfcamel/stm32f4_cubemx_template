@@ -19,7 +19,8 @@ set(OPTIMIZE "-Os")
 
 set(CMAKE_C_FLAGS "${MCU} ${OPTIMIZE} ${DEBUG} -ffunction-sections -fdata-sections -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -fpermissive -fexceptions -fnon-call-exceptions -fno-rtti -fno-use-cxa-atexit -fno-common")
-set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=nano.specs -Wl,--gc-sections")
+# set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=nano.specs -Wl,--gc-sections")
+set(CMAKE_C_LINK_FLAGS "${CMAKE_C_FLAGS} -T${CMAKE_CURRENT_LIST_DIR}/STM32F411RETx_FLASH.ld  --specs=rdimon.specs -Wl,--gc-sections")
 
 set(C_SOURCES_COMMON
   ${CMAKE_SOURCE_DIR}/Core/Src/app.c
@@ -80,7 +81,7 @@ target_compile_definitions(${PROJ} PRIVATE
   )
 
 target_link_libraries(${PROJ}
-  -lc -lm -lnosys
+  -lm -lnosys
   )
 
 add_custom_target(${PROJ}.bin ALL
